@@ -52,7 +52,7 @@
         }
         catch {
             #Things went wrong so throw the error out
-            Write-Output $Error
+            Write-Host $Error -ForegroundColor Red
         }
         finally {
             #Clear the error list
