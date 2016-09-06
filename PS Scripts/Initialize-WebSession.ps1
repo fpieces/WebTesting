@@ -28,10 +28,12 @@
 
     try {
         #Webrequest stored to session variable.
-        $iwr = Invoke-WebRequest -uri $uri -SessionVariable session
+        $iwr = Invoke-WebRequest -uri $uri -SessionVariable initialSession
         
-        #Output session object
-        Write-Output $session
+        #Output custom object to keep the session alive.
+        $responseWithSession = New-Object PSObject -Property @{ Response = $iwr; Session = $initialSession }
+        Write-Output $responseWithSession
+
     }
     catch {
         #Something went wrong, write the output.
