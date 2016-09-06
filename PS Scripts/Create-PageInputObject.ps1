@@ -39,19 +39,27 @@
     [parameter(Mandatory = $true)]
         [System.Uri] $uri,
 
-    [parameter(Mandatory = $true)]
+    [parameter(Mandatory = $false)]
         [Microsoft.PowerShell.Commands.WebRequestSession] $activeSession
     )
 
     process {
         #Custom PSObject for creating the page input properties
         $outputObject = New-Object PSObject
-
+        
         #Gets the page inputs and adds the property to the custom object.
-        (Invoke-WebRequest -Uri $uri -WebSession $activeSession).InputFields | Where-Object { ($_.OuterHTML -inotmatch "type") -or ($_.OuterHTML -imatch "password") } | ForEach-Object {
-        $outputObject | Add-Member -Name $_.Name -MemberType NoteProperty -Value ""
+        if (!($activeSession)) {
+            #Active session supplied
+            (Invoke-WebRequest -Uri $uri -WebSession $activeSession).InputFields | Where-Object { ($_.Type -inotmatch "hidden") -and ($_.Type -inotmatch "submit") } | ForEach-Object {
+            $outputObject | Add-Member -Name $_.Name -MemberType NoteProperty -Value ""
+            }
         }
-
+        Else {
+            #No active Session
+            (Invoke-WebRequest -Uri $uri -WebSession $activeSession).InputFields | Where-Object { ($_.Type -inotmatch "hidden") -and ($_.Type -inotmatch "submit") } | ForEach-Object {
+            $outputObject | Add-Member -Name $_.Name -MemberType NoteProperty -Value ""
+            }
+        }
         Write-Output $outputObject
     }
-}
+} 
